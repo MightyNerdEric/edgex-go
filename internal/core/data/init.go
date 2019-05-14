@@ -23,6 +23,8 @@ import (
 	"syscall"
 	"time"
 
+	secretHttp "github.com/edgexfoundry-holding/go-mod-core-security/pkg/http"
+	secret "github.com/edgexfoundry-holding/go-mod-core-security/security/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/metadata"
@@ -47,6 +49,7 @@ var Configuration *ConfigurationStruct
 var dbClient interfaces.DBClient
 var LoggingClient logger.LoggingClient
 var registryClient registry.Client
+var secretsClient secret.SecretClient
 
 // TODO: Refactor names in separate PR: See comments on PR #1133
 var chEvents chan interface{}  // A channel for "domain events" sourced from event operations
@@ -111,6 +114,15 @@ func Init(useRegistry bool) bool {
 		chUpdates = make(chan interface{})
 		go listenForConfigChanges()
 	}
+
+	secretsClient = secretHttp.NewHttpClient(Configuration.Secrets)
+
+	sec, err := secretsClient.GetValue("coredatapasswd")
+	if err != nil {
+		return false
+	}
+
+	LoggingClient.Warn(sec)
 
 	go telemetry.StartCpuUsageAverage()
 

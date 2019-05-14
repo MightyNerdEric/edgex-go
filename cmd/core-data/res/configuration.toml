@@ -54,3 +54,11 @@ Host = '*'
 Port = 5563
 Type = 'zero'
 Topic = 'events'
+
+[Secrets]
+Host = '127.0.0.1'
+Port = '8200'
+Path = 'v1/secret/data/edgex/coredata'
+ [Secrets.Authentication]
+ AuthType = 'X-Vault-Token'
+ AuthToken = 'root'
